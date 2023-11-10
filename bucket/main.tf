@@ -14,6 +14,10 @@ variable "keypath" {
     type=string
 }
 
+variable "bucket-location" {
+  type=string
+}
+
 provider "google" {
     credentials = var.keypath 
     project = var.project
@@ -21,3 +25,7 @@ provider "google" {
     zone    = var.zone
 }
 
+resource "google_storage_bucket" "terraform-state" {
+  name  = "terraform-state-bucket"
+  location = var.bucket-location
+}
