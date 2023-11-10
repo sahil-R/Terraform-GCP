@@ -25,7 +25,21 @@ provider "google" {
     zone    = var.zone
 }
 
-resource "google_storage_bucket" "terraform-state" {
-  name  = "terraform-state-bucket"
+resource "google_storage_bucket" "terraform-state-test-tester-150998" {
+  name  = "terraform-state-bucket-test-tester-150998"
   location = var.bucket-location
+}
+
+
+
+output "url" {
+    value   = google_storage_bucket.terraform-state-test-tester-150998.url 
+}
+
+output "id" {
+    value   = google_storage_bucket.terraform-state-test-tester-150998.id 
+}
+
+output "public-access-prevention" {
+    value   = google_storage_bucket.terraform-state-test-tester-150998.public_access_prevention 
 }
