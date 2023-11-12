@@ -128,24 +128,53 @@ resource "google_container_cluster" "primary" {
   location = var.region
   initial_node_count = 1
   remove_default_node_pool = true
+  deletion_protection=false
+  vertical_pod_autoscaling {
+    enabled = true
+  }
+  cluster_autoscaling {
+    enabled = false
+    # resource_limits {
+    #   maximum = 16
+    #   resource_type = "cpu"
+    # }
+    # resource_limits {
+    #   maximum = 20
+    #   resource_type = "memory"
+    # }
+  }
+  addons_config {  
+    horizontal_pod_autoscaling {
+      disabled= false
+    }
+  }
 }
 
 resource "google_container_node_pool" "primary_nodes" {
     name = "primary-nodes"
     location = var.region
     cluster = google_container_cluster.primary.id
-    autoscaling {
-      min_node_count = 1
-      max_node_count = 4
+    # initial_node_count = 1
+    node_locations = [var.zone]
+
+    management {
+    auto_repair  = true
+    auto_upgrade = true
     }
+    autoscaling {
+      # min_node_count = 1
+      # max_node_count = 4
+      total_min_node_count = 1
+      total_max_node_count = 4
+    }
+    
     node_config {
     preemptible  = false
     machine_type = "e2-small"
-
     labels = {
-      node = "primary"
+      node = "primary",
+      try  =  "this"
     }
-
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
     service_account = google_service_account.kubernetes.email
     oauth_scopes    = [
@@ -158,9 +187,15 @@ resource "google_container_node_pool" "secondary_nodes" {
     name = "secondary-nodes"
     location = var.region
     cluster = google_container_cluster.primary.id
+    node_locations = [var.zone]
+
+    management {
+    auto_repair  = true
+    auto_upgrade = true
+    }   
     autoscaling {
-      min_node_count = 0
-      max_node_count = 2
+      total_min_node_count = 1
+      total_max_node_count = 4
     }
     node_config {
     preemptible  = true
