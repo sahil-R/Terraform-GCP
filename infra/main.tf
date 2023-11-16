@@ -129,23 +129,15 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   remove_default_node_pool = true
   deletion_protection=false
-  vertical_pod_autoscaling {
-    enabled = true
-  }
   cluster_autoscaling {
-    enabled = false
-    # resource_limits {
-    #   maximum = 16
-    #   resource_type = "cpu"
-    # }
-    # resource_limits {
-    #   maximum = 20
-    #   resource_type = "memory"
-    # }
-  }
-  addons_config {  
-    horizontal_pod_autoscaling {
-      disabled= false
+    enabled = true
+    resource_limits {
+      maximum = 16
+      resource_type = "cpu"
+    }
+    resource_limits {
+      maximum = 20
+      resource_type = "memory"
     }
   }
 }
@@ -154,8 +146,7 @@ resource "google_container_node_pool" "primary_nodes" {
     name = "primary-nodes"
     location = var.region
     cluster = google_container_cluster.primary.id
-    # initial_node_count = 1
-    node_locations = [var.zone]
+    initial_node_count = 1
 
     management {
     auto_repair  = true
@@ -187,8 +178,7 @@ resource "google_container_node_pool" "secondary_nodes" {
     name = "secondary-nodes"
     location = var.region
     cluster = google_container_cluster.primary.id
-    node_locations = [var.zone]
-
+    initial_node_count = 1
     management {
     auto_repair  = true
     auto_upgrade = true
