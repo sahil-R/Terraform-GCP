@@ -129,6 +129,10 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   remove_default_node_pool = true
   deletion_protection=false
+
+  node_config {
+    disk_size_gb = 10
+  }
   cluster_autoscaling {
     enabled = true
     resource_limits {
@@ -139,6 +143,12 @@ resource "google_container_cluster" "primary" {
       maximum = 20
       resource_type = "memory"
     }
+    auto_provisioning_defaults {
+      management {
+      auto_repair  = true
+      auto_upgrade = true
+      }
+    }
   }
 }
 
@@ -147,7 +157,7 @@ resource "google_container_node_pool" "primary_nodes" {
     location = var.region
     cluster = google_container_cluster.primary.id
     initial_node_count = 1
-
+    max_pods_per_node = 8
     management {
     auto_repair  = true
     auto_upgrade = true
@@ -161,7 +171,8 @@ resource "google_container_node_pool" "primary_nodes" {
     
     node_config {
     preemptible  = false
-    machine_type = "e2-small"
+    machine_type = "e2-medium"
+    disk_size_gb = 10
     labels = {
       node = "primary",
       try  =  "this"
@@ -189,8 +200,8 @@ resource "google_container_node_pool" "secondary_nodes" {
     }
     node_config {
     preemptible  = true
-    machine_type = "e2-small"
-
+    machine_type = "e2-medium"
+    disk_size_gb = 10
     labels = {
       node = "secondary"
     }
